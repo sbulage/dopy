@@ -1,7 +1,13 @@
 Digital Ocean API Python Wrapper
 ================================
 
-Inspired by [dop](https://github.com/ahmontero/dop).
+This is a fork of wiredcraft/dopy repository, this repo is created as the original repos are not being
+maintained officially.
+
+Inspired by `dop <https://github.com/ahmontero/dop>`_
+
+Forked from `dopy <https://github.com/Wiredcraft/dopy>`_
+
 
 Installation
 ============
@@ -13,10 +19,9 @@ Installation
 Getting Started
 ===============
 
-To interact with Digital Ocean, you first need .. a digital ocean account with 
-valid API keys.
+To interact with Digital Ocean, you first need a Digital Ocean account with valid API keys.
 
-Keys can be set either as Env variables, or within the code.
+API Keys can be set either as environmental variables, or within the code.
 
 For API v.2.
 
@@ -86,6 +91,6 @@ Methods for Floating IPs are:
 TODO
 ====
 
-See github issue list - post if any needed
+See GitHub issue list - post if any needed
 
-https://github.com/devo-ps/dopy/issues
+https://github.com/Akasurde/dopy/issues
