@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#coding: utf-8
+# coding: utf-8
 """
 This module simply sends request to the Digital Ocean API,
 and returns their response as a dict.
@@ -10,6 +10,7 @@ import json as json_module
 from six import wraps
 
 API_ENDPOINT = 'https://api.digitalocean.com'
+
 
 class DoError(RuntimeError):
     pass
@@ -45,6 +46,7 @@ def paginated(func):
 
 
 class DoManager(object):
+
     def __init__(self, client_id, api_key, api_version=1):
         self.api_endpoint = API_ENDPOINT
         self.client_id = client_id
@@ -55,17 +57,19 @@ class DoManager(object):
             self.api_endpoint += '/v2'
         if self.api_version == 1:
             self.api_endpoint += '/v1'
+        self.v2_api_required_str = ('This feature requires the V2 API. In order to continue, '
+                                    'update DO_API_VERSION to 2.')
 
     def all_active_droplets(self):
         json = self.request('/droplets/')
         if self.api_version == 2:
             for index in range(len(json['droplets'])):
-                self.populate_droplet_ips(json['droplets'][index])
+                DoManager.populate_droplet_ips(json['droplets'][index])
         return json['droplets']
 
     def new_droplet(self, name, size_id, image_id, region_id,
-            ssh_key_ids=None, virtio=True, private_networking=False,
-            backups_enabled=False, user_data=None, ipv6=False):
+                    ssh_key_ids=None, virtio=True, private_networking=False,
+                    backups_enabled=False, user_data=None, ipv6=False):
 
         if self.api_version == 2:
             params = {
@@ -118,7 +122,7 @@ class DoManager(object):
     def show_droplet(self, droplet_id):
         json = self.request('/droplets/%s' % droplet_id)
         if self.api_version == 2:
-            self.populate_droplet_ips(json['droplet'])
+            DoManager.populate_droplet_ips(json['droplet'])
         return json['droplet']
 
     def droplet_v2_action(self, droplet_id, droplet_type, params=None):
@@ -249,7 +253,8 @@ class DoManager(object):
         json.pop('status', None)
         return json
 
-    def populate_droplet_ips(self, droplet):
+    @staticmethod
+    def populate_droplet_ips(droplet):
         droplet[u'ip_address'] = ''
         for networkIndex in range(len(droplet['networks']['v4'])):
             network = droplet['networks']['v4'][networkIndex]
@@ -258,12 +263,12 @@ class DoManager(object):
             if network['type'] == 'private':
                 droplet[u'private_ip_address'] = network['ip_address']
 
-#regions==========================================
+# regions==========================================
     def all_regions(self):
         json = self.request('/regions/')
         return json['regions']
 
-#images==========================================
+# images==========================================
     def all_images(self, filter='global'):
         params = {'filter': filter}
         json = self.request('/images/', params)
@@ -286,7 +291,6 @@ class DoManager(object):
         return json
 
     def show_image(self, image_id):
-        params = {'image_id': image_id}
         json = self.request('/images/%s' % image_id)
         return json['image']
 
@@ -307,7 +311,7 @@ class DoManager(object):
         json.pop('status', None)
         return json
 
-#ssh_keys=========================================
+# ssh_keys=========================================
     def all_ssh_keys(self):
         if self.api_version == 2:
             json = self.request('/account/keys')
@@ -333,7 +337,7 @@ class DoManager(object):
 
     def edit_ssh_key(self, key_id, name, pub_key):
         if self.api_version == 2:
-            params = {'name': name} # v2 API doesn't allow to change key body now
+            params = {'name': name}  # v2 API doesn't allow to change key body now
             json = self.request('/account/keys/%s/' % key_id, params, method='PUT')
         else:
             params = {'name': name, 'ssh_pub_key': pub_key}  # the doc needs to be improved
@@ -347,21 +351,21 @@ class DoManager(object):
             self.request('/ssh_keys/%s/destroy/' % key_id)
         return True
 
-#sizes============================================
+# sizes============================================
     def sizes(self):
         json = self.request('/sizes/')
         return json['sizes']
 
-#domains==========================================
+# domains==========================================
     def all_domains(self):
         json = self.request('/domains/')
         return json['domains']
 
     def new_domain(self, name, ip):
         params = {
-                'name': name,
-                'ip_address': ip
-            }
+            'name': name,
+            'ip_address': ip
+        }
         if self.api_version == 2:
             json = self.request('/domains', params=params, method='POST')
         else:
@@ -393,10 +397,14 @@ class DoManager(object):
         else:
             params['record_type'] = record_type
 
-        if name: params['name'] = name
-        if priority: params['priority'] = priority
-        if port: params['port'] = port
-        if weight: params['weight'] = weight
+        if name:
+            params['name'] = name
+        if priority:
+            params['priority'] = priority
+        if port:
+            params['port'] = port
+        if weight:
+            params['weight'] = weight
 
         if self.api_version == 2:
             json = self.request('/domains/%s/records/' % domain_id, params, method='POST')
@@ -413,7 +421,7 @@ class DoManager(object):
 
     def edit_domain_record(self, domain_id, record_id, record_type, data, name=None, priority=None, port=None, weight=None):
         if self.api_version == 2:
-            params = {'name': name} # API v.2 allows only record name change
+            params = {'name': name}  # API v.2 allows only record name change
             json = self.request('/domains/%s/records/%s' % (domain_id, record_id), params, method='PUT')
             return json['domain_record']
 
@@ -422,10 +430,14 @@ class DoManager(object):
             'data': data,
         }
 
-        if name: params['name'] = name
-        if priority: params['priority'] = priority
-        if port: params['port'] = port
-        if weight: params['weight'] = weight
+        if name:
+            params['name'] = name
+        if priority:
+            params['priority'] = priority
+        if port:
+            params['port'] = port
+        if weight:
+            params['weight'] = weight
         json = self.request('/domains/%s/records/%s/edit/' % (domain_id, record_id), params)
         return json['record']
 
@@ -436,28 +448,26 @@ class DoManager(object):
             self.request('/domains/%s/records/%s/destroy/' % (domain_id, record_id))
         return True
 
-#events(actions in v2 API)========================
+# events(actions in v2 API)========================
     def show_all_actions(self):
         if self.api_version == 2:
             json = self.request('/actions')
             return json['actions']
-        return False # API v.1 haven't this functionality
+        return False  # API v.1 haven't this functionality
 
     def show_action(self, action_id):
         if self.api_version == 2:
-            json = self.request('/actions/%s' % event_id)
+            json = self.request('/actions/%s' % action_id)
             return json['action']
-        return show_event(self, action_id)
+        return self.show_event(action_id)
 
     def show_event(self, event_id):
         if self.api_version == 2:
-            return show_action(self, event_id)
+            return self.show_action(event_id)
         json = self.request('/events/%s' % event_id)
         return json['event']
 
-#floating_ips=====================================
-    v2_api_required_str = ('This feature requires the V2 API. ' \
-        'In order to continue, update DO_API_VERSION to 2.')
+# floating_ips=====================================
 
     def all_floating_ips(self):
         """
@@ -467,7 +477,7 @@ class DoManager(object):
             json = self.request('/floating_ips')
             return json['floating_ips']
         else:
-            raise DoError(v2_api_required_str)
+            raise DoError(self.v2_api_required_str)
 
     def new_floating_ip(self, **kwargs):
         """
@@ -478,11 +488,11 @@ class DoManager(object):
 
         if self.api_version == 2:
             if droplet_id is not None and region is not None:
-                raise DoError('Only one of droplet_id and region is required to create a Floating IP. ' \
-                    'Set one of the variables and try again.')
+                raise DoError('Only one of droplet_id and region is required to create a Floating IP. '
+                              'Set one of the variables and try again.')
             elif droplet_id is None and region is None:
-                raise DoError('droplet_id or region is required to create a Floating IP. ' \
-                    'Set one of the variables and try again.')
+                raise DoError('droplet_id or region is required to create a Floating IP. '
+                              'Set one of the variables and try again.')
             else:
                 if droplet_id is not None:
                     params = {'droplet_id': droplet_id}
@@ -492,7 +502,7 @@ class DoManager(object):
                 json = self.request('/floating_ips', params=params, method='POST')
                 return json['floating_ip']
         else:
-            raise DoError(v2_api_required_str)
+            raise DoError(self.v2_api_required_str)
 
     def destroy_floating_ip(self, ip_addr):
         """
@@ -501,19 +511,19 @@ class DoManager(object):
         if self.api_version == 2:
             self.request('/floating_ips/' + ip_addr, method='DELETE')
         else:
-            raise DoError(v2_api_required_str)
+            raise DoError(self.v2_api_required_str)
 
     def assign_floating_ip(self, ip_addr, droplet_id):
         """
         Assigns a Floating IP to a Droplet.
         """
         if self.api_version == 2:
-            params = {'type': 'assign','droplet_id': droplet_id}
+            params = {'type': 'assign', 'droplet_id': droplet_id}
 
             json = self.request('/floating_ips/' + ip_addr + '/actions', params=params, method='POST')
             return json['action']
         else:
-            raise DoError(v2_api_required_str)
+            raise DoError(self.v2_api_required_str)
 
     def unassign_floating_ip(self, ip_addr):
         """
@@ -526,7 +536,7 @@ class DoManager(object):
             json = self.request('/floating_ips/' + ip_addr + '/actions', params=params, method='POST')
             return json['action']
         else:
-            raise DoError(v2_api_required_str)
+            raise DoError(self.v2_api_required_str)
 
     def list_floating_ip_actions(self, ip_addr):
         """
@@ -536,7 +546,7 @@ class DoManager(object):
             json = self.request('/floating_ips/' + ip_addr + '/actions')
             return json['actions']
         else:
-            raise DoError(v2_api_required_str)
+            raise DoError(self.v2_api_required_str)
 
     def get_floating_ip_action(self, ip_addr, action_id):
         """
@@ -546,9 +556,9 @@ class DoManager(object):
             json = self.request('/floating_ips/' + ip_addr + '/actions/' + action_id)
             return json['action']
         else:
-            raise DoError(v2_api_required_str)
+            raise DoError(self.v2_api_required_str)
 
-#tags=====================================
+# tags=====================================
     def new_tag(self, name):
         if self.api_version == 2:
             params = {
@@ -625,11 +635,11 @@ class DoManager(object):
         else:
             raise DoError(self.v2_api_required_str)
 
-#low_level========================================
+# low_level========================================
     def request(self, path, params={}, method='GET'):
         if not path.startswith('/'):
-            path = '/'+path
-        url = self.api_endpoint+path
+            path = '/' + path
+        url = self.api_endpoint + path
 
         if self.api_version == 2:
             headers = {'Authorization': "Bearer %s" % self.api_key}
