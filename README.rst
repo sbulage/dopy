@@ -1,13 +1,12 @@
-Digital Ocean API Python Wrapper
+DigitalOcean API Python Client
 ================================
 
 This is a fork of wiredcraft/dopy repository, this repo is created as the original repos are not being
 maintained officially.
 
-Inspired by `dop <https://github.com/ahmontero/dop>`_
+Forked from `dopy <https://github.com/Wiredcraft/dopy>`_.
 
-Forked from `dopy <https://github.com/Wiredcraft/dopy>`_
-
+Inspired by `dop <https://github.com/ahmontero/dop>`_.
 
 Installation
 ============
@@ -19,34 +18,32 @@ Installation
 Getting Started
 ===============
 
-To interact with Digital Ocean, you first need a Digital Ocean account with valid API keys.
+To interact with DigitalOcean, first you will need a DigitalOcean account with 
+a valid API keys.
 
-API Keys can be set either as environmental variables, or within the code.
+API Keys can be set either as Env variables, or within the code.
 
 For API v.2.
 
 .. code-block:: bash
-
     # export DO_API_VERSION='2'
     # export DO_API_TOKEN='api_token'
 
 .. code-block:: pycon
 
     >>> from dopy.manager import DoManager
+    >>> do = DoManager(api_token='api_token')
     >>> do = DoManager(None, 'api_token', api_version=2)
-
 
 For API v.1.
 
 .. code-block:: bash
-    
+
     # export DO_CLIENT_ID='client_id'
     # export DO_API_KEY='long_api_key'
-
+ 
 .. code-block:: pycon
 
-    >>> from dopy.manager import DoManager
-    >>> do = DoManager('client_id', 'long_api_key')
 
 Methods
 =======
@@ -71,8 +68,9 @@ sizes, images and datacenters; ex.
 
 .. code-block:: pycon
 
-    >>> do.show_domain('exapmle.com')
+    >>> do.show_domain('example.com')
     >>> do.new_droplet('new_droplet', '512mb', 'lamp', 'ams2')
+
 
 Methods for Floating IPs are:
 
@@ -86,7 +84,6 @@ Methods for Floating IPs are:
     >>> do.list_floating_ip_actions(ip_addr)
     >>> do.get_floating_ip_action(ip_addr, action_id)
                                     
-
 
 TODO
 ====
